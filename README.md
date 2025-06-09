@@ -23,7 +23,7 @@ Then in a terminal:
 ```bash
 docker run --rm -it -p 8888:8888 \
   -v "$PWD/secrets_mqtt.py:/app/secrets_mqtt.py" \
-  ghcr.io/atuxen/colorbot:1.0
+  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:1.0
 
 ```
 
