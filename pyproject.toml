@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "ai-orchestrated-sdl"
+version = "1.0.0"
+description = ""
+authors =   ["Andreas Tuxen", "Jin Hyun Chang"]
+license = "MPL-2.0"
+packages = [{ include = "pump_controller" }]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+pyserial = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+datetime = "*"
+botorch = "*"
+scipy = "1.12.0"
+torch = "*"
+ipython = "*"
+paho-mqtt = "^2.1.0"
+jupyterlab = "^4.4.2"
+odyssey = { git = "https://gitlab.com/auto_lab/odyssey.git", rev = "a9aed88" }
+
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
