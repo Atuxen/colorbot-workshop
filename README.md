@@ -50,6 +50,13 @@ Then install poetry, using pip or pip3:
 pip install poetry
 ```
 
+It is recommended to use python 3.12.3 for stability. You can use ´pyenv´for setting the python version, by first installing it, and then setting it. 
+
+```bash
+ pyenv install 3.12.3  
+pyenv local 3.12.3
+ ```
+
 Then install dependencies:
 ```bash
 poetry install

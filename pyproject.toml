@@ -22,6 +22,7 @@ ipython = "*"
 paho-mqtt = "^2.1.0"
 jupyterlab = "^4.4.2"
 odyssey = { git = "https://gitlab.com/auto_lab/odyssey.git", rev = "a9aed88" }
+ipykernel = "^6.29.5"
 
 
 
