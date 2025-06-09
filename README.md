@@ -1,6 +1,6 @@
 # AI-Orchestrated Self-Driving Labs — Exercises
 
-Welcome to the exercises for the **AI-Orchestrated Self-Driving Labs** course. 
+Welcome to the exercises for the **AI-Orchestrated Self-Driving Labs** course.
 
 This repository provides the code, Jupyter notebooks, and configuration files for working with the colorbot.
 
