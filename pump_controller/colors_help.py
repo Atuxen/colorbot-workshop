@@ -3,20 +3,25 @@ import numpy as np
 import pandas as pd
 import torch
 
+
 def choose_text_color(background_color):
     # Normalize RGB values to the range [0, 1]
     normalized_background_color = [value / 255.0 for value in background_color]
 
     # Calculate relative luminance
-    luminance = 0.299 * normalized_background_color[0] + 0.587 * normalized_background_color[1] + 0.114 * normalized_background_color[2]
+    luminance = (
+        0.299 * normalized_background_color[0]
+        + 0.587 * normalized_background_color[1]
+        + 0.114 * normalized_background_color[2]
+    )
 
     # Choose text color based on luminance
-    text_color = 'black' if luminance > 0.5 else 'white'
+    text_color = "black" if luminance > 0.5 else "white"
 
     return text_color
 
-def visualize_rgb(mixture, rgb, pump_controller, target = 'pump_controller', score = None):
 
+def visualize_rgb(mixture, rgb, pump_controller, target="pump_controller", score=None):
     """
     Visualizes RGB data using a pie chart and circles.
 
@@ -40,7 +45,6 @@ def visualize_rgb(mixture, rgb, pump_controller, target = 'pump_controller', sco
     - RGB values should be in the range [0, 255]. The function normalizes them to [0, 1] for plotting.
     """
 
-
     fig, ax = plt.subplots()
 
     if np.sum(mixture) == 0:
@@ -50,26 +54,41 @@ def visualize_rgb(mixture, rgb, pump_controller, target = 'pump_controller', sco
 
     def add_score(background_color):
         if score != None:
-            plt.annotate(np.round(score,2), (0,0), fontsize = 14, 
-                        ha = 'center', va = 'center',
-                        color = choose_text_color(background_color))
+            plt.annotate(
+                np.round(score, 2),
+                (0, 0),
+                fontsize=14,
+                ha="center",
+                va="center",
+                color=choose_text_color(background_color),
+            )
 
     # Plot the pie chart around the circle with percentage values
-    pie = ax.pie(mixture, 
-                colors=['red', 'green', 'blue', 'yellow'], radius=1, startangle=90, 
-                center = (0,0), wedgeprops=dict(edgecolor='black', linewidth=1))
-    
+    pie = ax.pie(
+        mixture,
+        colors=["red", "green", "blue", "yellow"],
+        radius=1,
+        startangle=90,
+        center=(0, 0),
+        wedgeprops=dict(edgecolor="black", linewidth=1),
+    )
+
     # Plot the circle with the specified RGB color
-    circle = plt.Circle((0, 0), 0.9, edgecolor='black', linewidth=1, 
-                        facecolor=np.divide(rgb, 255.0))
+    circle = plt.Circle(
+        (0, 0), 0.9, edgecolor="black", linewidth=1, facecolor=np.divide(rgb, 255.0)
+    )
     ax.add_artist(circle)
 
-
     if isinstance(target, (type(None), str)):
-        if target == 'pump_controller':
+        if target == "pump_controller":
             # Plot the circle with the target RGB color from the pump_controller
-            circle2 = plt.Circle((0, 0), 0.45, edgecolor='black', linewidth=1, 
-                                facecolor=np.divide(pump_controller.target_color, 255.0))
+            circle2 = plt.Circle(
+                (0, 0),
+                0.45,
+                edgecolor="black",
+                linewidth=1,
+                facecolor=np.divide(pump_controller.target_color, 255.0),
+            )
             ax.add_artist(circle2)
 
             add_score(pump_controller.target_color)
@@ -78,21 +97,24 @@ def visualize_rgb(mixture, rgb, pump_controller, target = 'pump_controller', sco
         else:
             pass
     else:
-        assert isinstance(target, (list, np.ndarray, torch.Tensor)), "Target must be a list, np.array, or torch.Tensor"
+        assert isinstance(
+            target, (list, np.ndarray, torch.Tensor)
+        ), "Target must be a list, np.array, or torch.Tensor"
         assert len(target) == 3, "Target must have a length of 3"
 
         # Plot the circle with the specified target RGB color
-        circle2 = plt.Circle((0, 0), 0.45, edgecolor='black', linewidth=1, 
-                            facecolor=np.divide(target, 255.0))
+        circle2 = plt.Circle(
+            (0, 0),
+            0.45,
+            edgecolor="black",
+            linewidth=1,
+            facecolor=np.divide(target, 255.0),
+        )
         ax.add_artist(circle2)
 
         add_score(target)
 
-
-    
-
-
-    ax.set_aspect('equal', adjustable='box')
+    ax.set_aspect("equal", adjustable="box")
 
     plt.xlim(-1.1, 1.1)
     plt.ylim(-1.1, 1.1)
@@ -100,9 +122,7 @@ def visualize_rgb(mixture, rgb, pump_controller, target = 'pump_controller', sco
     plt.show()
 
 
-
 def visualize_candidates(data_df):
-
     """
     Visualizes candidate mixture data using pie charts for mixtures, measured colors, and target colors.
 
@@ -123,19 +143,14 @@ def visualize_candidates(data_df):
     - RGB values for measured and target colors should be in the range [0, 255]. The function normalizes them to [0, 1] for plotting.
     """
 
-    def draw_pie(dist, 
-             xpos, 
-             ypos, 
-             size, 
-             fill_color = None,
-             ax=None):
+    def draw_pie(dist, xpos, ypos, size, fill_color=None, ax=None):
 
         # for incremental pie slices
         cumsum = np.cumsum(dist)
-        cumsum = cumsum/ cumsum[-1]
+        cumsum = cumsum / cumsum[-1]
         pie = [0] + cumsum.tolist()
 
-        colors = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
+        colors = {0: "red", 1: "green", 2: "blue", 3: "yellow"}
 
         col = 0
         for r1, r2 in zip(pie[:-1], pie[1:]):
@@ -146,41 +161,64 @@ def visualize_candidates(data_df):
             xy = np.column_stack([x, y])
 
             if fill_color == None:
-                ax.scatter([xpos], [ypos], marker=xy, s=size, color = colors[col])
+                ax.scatter([xpos], [ypos], marker=xy, s=size, color=colors[col])
             else:
-                ax.scatter([xpos], [ypos], marker=xy, s=size, color = fill_color)
-
+                ax.scatter([xpos], [ypos], marker=xy, s=size, color=fill_color)
 
             col += 1
 
         return ax
 
     # Reformat the dataframe to make all lists numpy (hacky, but works)
-    data_df = data_df[['mixture', 'measurement', 'target_measurement', 'score']]
+    data_df = data_df[["mixture", "measurement", "target_measurement", "score"]]
 
     data_list = data_df.T.values.tolist()
     data_list = [np.array(col) for col in data_list]
 
-    data_df = pd.DataFrame({'mixture': list(data_list[0]),
-                            'measurement': list(data_list[1]),
-                            'target': list(data_list[2]),
-                            'score': data_list[3].reshape(len(data_list[2]))})
+    data_df = pd.DataFrame(
+        {
+            "mixture": list(data_list[0]),
+            "measurement": list(data_list[1]),
+            "target": list(data_list[2]),
+            "score": data_list[3].reshape(len(data_list[2])),
+        }
+    )
 
     target_size = 500
     mixture_size = 3000
     measured_size = 2000
 
-    fig, ax = plt.subplots(figsize = (14,10))
+    fig, ax = plt.subplots(figsize=(14, 10))
 
     for i in range(len(data_df)):
-        draw_pie(data_df.mixture[i], i+1, data_df.score[i], mixture_size, fill_color = None, ax = ax) # Mixture
-        draw_pie([1.0], i+1, data_df.score[i], measured_size, fill_color=list(data_df.measurement[i]/255), ax = ax) # Measured color
-        draw_pie([1.0], i+1, data_df.score[i], target_size, fill_color=list(data_df.target[i]/255), ax = ax) # Target color
+        draw_pie(
+            data_df.mixture[i],
+            i + 1,
+            data_df.score[i],
+            mixture_size,
+            fill_color=None,
+            ax=ax,
+        )  # Mixture
+        draw_pie(
+            [1.0],
+            i + 1,
+            data_df.score[i],
+            measured_size,
+            fill_color=list(data_df.measurement[i] / 255),
+            ax=ax,
+        )  # Measured color
+        draw_pie(
+            [1.0],
+            i + 1,
+            data_df.score[i],
+            target_size,
+            fill_color=list(data_df.target[i] / 255),
+            ax=ax,
+        )  # Target color
 
-    plt.xlim(0, len(data_df)+1)
+    plt.xlim(0, len(data_df) + 1)
     plt.ylim(data_df.score.min() - 8, data_df.score.max() + 8)
 
-    plt.xlabel('Test #')
-    plt.ylabel('Score')
+    plt.xlabel("Test #")
+    plt.ylabel("Score")
     plt.show()
-

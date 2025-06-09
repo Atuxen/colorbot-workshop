@@ -5,9 +5,9 @@ import pandas as pd
 import torch
 from .utils import read_logfile, write_to_logfile
 
+
 class SilicoPumpController:
     def __init__(self, noise_std):
-
         """
         Initializes a SilicoPumpController object.
 
@@ -25,21 +25,21 @@ class SilicoPumpController:
         self.noise_std = noise_std
 
         self.target_mixture = [0.25, 0.25, 0.25, 0.25]
-        self.target_color = [255, 255, 255] 
+        self.target_color = [255, 255, 255]
 
         # Create "logs" folder if it doesn't exist
-        if not os.path.exists('silicologs'):
-            os.makedirs('silicologs')
+        if not os.path.exists("silicologs"):
+            os.makedirs("silicologs")
 
         # Create a log file with the current date and time and write column names
         now = datetime.datetime.now()
         self.log_file = f"silicologs/silicolog_{now.strftime('%d%m%Y_%H%M%S')}.csv"
-        log_df = pd.DataFrame(columns=['mixture', 'measurement', 'target_mixture', 'target_measurement'])
+        log_df = pd.DataFrame(
+            columns=["mixture", "measurement", "target_mixture", "target_measurement"]
+        )
         log_df.to_csv(self.log_file, index=False)
 
-
-    def mix_color(self, col_list, changing_target = False, ph = False):
-
+    def mix_color(self, col_list, changing_target=False, ph=False):
         """
         Mixes colors based on the provided color coefficients and adds noise.
 
@@ -55,15 +55,14 @@ class SilicoPumpController:
         - Appends color mixture and measurement data to the log file unless changing_target is True.
         """
 
-        true_coefficients = np.array([[255, 0, 0],
-                                  [0, 255, 0],
-                                  [0, 0, 255],
-                                  [255, 255, 0]]
-                                  )
-
+        true_coefficients = np.array(
+            [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]]
+        )
 
         # Normalization
-        col_list = np.array(col_list).reshape(4,) # Make sure that input list has np shape (4,)
+        col_list = np.array(col_list).reshape(
+            4,
+        )  # Make sure that input list has np shape (4,)
         col_list[col_list < 0] = 0
         if col_list.sum() == 0:
             col_list = [0.25, 0.25, 0.25, 0.25]
@@ -76,26 +75,23 @@ class SilicoPumpController:
 
         if not changing_target:
             # Append color mixture and measurement data to the log file
-            write_to_logfile(col_list, mixed_color_with_noise, self.target_mixture, self.target_color, self.log_file)
+            write_to_logfile(
+                col_list,
+                mixed_color_with_noise,
+                self.target_mixture,
+                self.target_color,
+                self.log_file,
+            )
 
-        if ph: 
-            ph_coefficients = np.array([[7],
-                                  [12],
-                                  [4],
-                                  [3]]
-                                  )
-            
+        if ph:
+            ph_coefficients = np.array([[7], [12], [4], [3]])
+
             ph_with_noise = np.dot(col_list, ph_coefficients) + noise
             return mixed_color_with_noise, ph_with_noise
 
-        
         return mixed_color_with_noise
-    
-
-
 
     def change_target(self, target_mixture):
-
         """
         Changes the target mixture and computes the corresponding target color.
 
@@ -111,18 +107,10 @@ class SilicoPumpController:
         """
 
         self.target_mixture = target_mixture
-        self.target_color = self.mix_color(target_mixture, changing_target = True)
+        self.target_color = self.mix_color(target_mixture, changing_target=True)
 
-        print(f"Silico target changed to {self.target_color}. Created by {self.target_mixture}.")
+        print(
+            f"Silico target changed to {self.target_color}. Created by {self.target_mixture}."
+        )
 
         return self.target_color
-
-    
-
-
-
-    
-    
-
-
-       

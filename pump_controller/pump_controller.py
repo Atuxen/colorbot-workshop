@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import os 
+import os
 import datetime
 import torch
 from .utils import read_logfile, write_to_logfile
@@ -22,12 +22,20 @@ import time
 import uuid
 import json
 import ssl
-#from pump_controller.mqtt_utils import request_task
+
+# from pump_controller.mqtt_utils import request_task
 from IPython.display import display, HTML
 
-class PumpController:
-    def __init__(self, ser_port, baud_rate = 115200, cell_volume = 5.0, drain_time = 10.0, config_file = 'config.json'):
 
+class PumpController:
+    def __init__(
+        self,
+        ser_port,
+        baud_rate=115200,
+        cell_volume=5.0,
+        drain_time=10.0,
+        config_file="config.json",
+    ):
         """
         Initializes a PumpController instance with the specified serial port and baud rate.
         The cell volume and drain time can also be defined.
@@ -48,33 +56,30 @@ class PumpController:
         - Retrieves the pump configuration from 'config.json' and stores it in the 'pump_config' attribute.
         """
         # Running from home with no USB serial access:
-        self.running_task = False 
-        self.mode = ""  
+        self.running_task = False
+        self.mode = ""
         if ser_port == None:
             self.made = "WIFI"
             connected = False
             while connected == False:
-                
+
                 try:
                     task = "hello_colorbot"
                     msg = self.mqtt_task_manager(task)
-                    #msg = request_task(task)
+                    # msg = request_task(task)
                     if msg.get("status") == "Colorbot is ready":
                         print(msg.get("status"))
                         break
                 except Exception as e:
                     print(e)
                 n = 5
-                print(f"Waiting another {n} seconds for colorbot to connect to MQTT broker ")
+                print(
+                    f"Waiting another {n} seconds for colorbot to connect to MQTT broker "
+                )
                 for i in range(n):
                     print(f"{n-i}...")
                     time.sleep(1)
-               
-                
-                
 
-
-      
         # USB or MQTT
         if ser_port:
             self.ser = serial.Serial(ser_port, baud_rate)
@@ -83,8 +88,11 @@ class PumpController:
 
             # Prompt user for credentials and wait
             while self.mode.upper() not in ("USB", "WIFI"):
-                self.mode = input("Please enter either USB or WIFI to choose mode: ").strip().upper()
-
+                self.mode = (
+                    input("Please enter either USB or WIFI to choose mode: ")
+                    .strip()
+                    .upper()
+                )
 
             # Here, you can send wifi_creds to your device, or further parse/validate as needed
             print(f"Mode chosen: {self.mode}")
@@ -94,12 +102,14 @@ class PumpController:
             if self.mode == "USB":
                 print("USB connection established, colorbot ready!")
 
-            if self.mode == "WIFI":   
+            if self.mode == "WIFI":
                 wifi_creds = f"{{{mqtt_conf.wifi_name}, {mqtt_conf.wifi_pass}}}"
                 self.ser.write((wifi_creds + "\n").encode())
 
                 n = 5
-                print(f"Now waiting {n} seconds for colorbot to connect to MQTT broker ")
+                print(
+                    f"Now waiting {n} seconds for colorbot to connect to MQTT broker "
+                )
                 for i in range(n):
                     print(f"{n-i}...")
                     time.sleep(1)
@@ -109,21 +119,21 @@ class PumpController:
                     try:
                         task = "hello_colorbot"
                         msg = self.mqtt_task_manager(task)
-                        #msg = request_task(task)
+                        # msg = request_task(task)
                         if msg.get("status") == "Colorbot is ready":
                             print(msg.get("status"))
                             break
 
                     except Exception as e:
                         print(e)
-                    
-                    print(f"Waiting another {n} seconds for colorbot to connect to MQTT broker ")
+
+                    print(
+                        f"Waiting another {n} seconds for colorbot to connect to MQTT broker "
+                    )
                     for i in range(n):
                         print(f"{n-i}...")
                         time.sleep(1)
-                    
 
-        
         # Config file loading
         config_file = Path(config_file)
 
@@ -138,32 +148,30 @@ class PumpController:
         self.config_file = config_file
         self.pump_config = self.get_config()
 
-
         # Properties
         self.target_mixture = [0.25, 0.25, 0.25, 0.25]
         self.target_color = [255, 255, 255]
         self.cell_volume = cell_volume
         self.drain_time = drain_time
 
-        self.last_color   = None
-        self.color_event  = threading.Event()
+        self.last_color = None
+        self.color_event = threading.Event()
 
         # Create "logs" folder if it doesn't exist
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
 
         # Create a log file with the current date and time and write column names
         now = datetime.datetime.now()
         self.log_file = f"logs/log_{now.strftime('%d%m%Y_%H%M%S')}.csv"
-        log_df = pd.DataFrame(columns=['mixture', 'measurement', 'target_mixture', 'target_measurement'])
+        log_df = pd.DataFrame(
+            columns=["mixture", "measurement", "target_mixture", "target_measurement"]
+        )
         log_df.to_csv(self.log_file, index=False)
-
-        
-
 
     ### COMMS: task managments ###
 
-    def mqtt_task_manager(self, task, timeout_extra = 0):
+    def mqtt_task_manager(self, task, timeout_extra=0):
         if self.running_task:
             print("Waiting for current task to finish before starting a new one.")
             return None
@@ -178,8 +186,9 @@ class PumpController:
         finally:
             self.running_task = False
 
-    def request_task(self, task, req_id, result_q, timeout_extra = 0):
+    def request_task(self, task, req_id, result_q, timeout_extra=0):
         timeout = 10 + timeout_extra
+
         def on_connect(client, userdata, flags, rc):
             client.subscribe(mqtt_conf.TOPIC_DATA)
 
@@ -218,10 +227,9 @@ class PumpController:
             task_payload = task
 
         print(f"Sending request with request id: {req_id}")
-        client.publish(mqtt_conf.TOPIC_CMD, json.dumps({
-            "task": task_payload,
-            "req_id": req_id
-        }))
+        client.publish(
+            mqtt_conf.TOPIC_CMD, json.dumps({"task": task_payload, "req_id": req_id})
+        )
 
         try:
             response = result_q.get(timeout=timeout)
@@ -233,10 +241,7 @@ class PumpController:
             client.disconnect()
             client.loop_stop()
 
-
-
     def send_to_colorbot(self, send_str):
-
         """
         Sends a string message to the colorbot over the established serial connection.
 
@@ -251,10 +256,9 @@ class PumpController:
         - The 'ser' attribute must represent a valid and open serial connection.
         """
 
-        self.ser.write(send_str.encode('utf-8'))
+        self.ser.write(send_str.encode("utf-8"))
 
-    def recv_from_colorbot(self, timeout = 10.0):
-
+    def recv_from_colorbot(self, timeout=10.0):
         """
         Receives data from the colorbot over the established serial connection.
 
@@ -273,7 +277,7 @@ class PumpController:
         - The method has a timeout mechanism to prevent waiting indefinitely for a response.
         - If a timeout occurs, it raises a TimeoutError with a suggestion to reset the device.
         """
-        
+
         start_marker = 60
         end_marker = 62
 
@@ -294,11 +298,12 @@ class PumpController:
                 x = self.ser.read()
 
             return ck
-        
-        raise TimeoutError("colorbot did not respond within timeout. Try resetting the device.")
-    
-    def wait_for_colorbot(self):
 
+        raise TimeoutError(
+            "colorbot did not respond within timeout. Try resetting the device."
+        )
+
+    def wait_for_colorbot(self):
         """
         Waits for the colorbot to indicate readiness for communication.
 
@@ -323,9 +328,7 @@ class PumpController:
             print(msg)
             self.send_to_colorbot("CONTINUE")
 
-
     def clear_serial_buffer(self):
-
         """
         Clears the serial buffer by reading and discarding any available data.
 
@@ -345,7 +348,6 @@ class PumpController:
             self.ser.read()
 
     def run_test(self, test_str):
-
         """
         Executes a command by sending a message to the colorbot and waiting for a response in return.
 
@@ -366,7 +368,6 @@ class PumpController:
 
         waiting_for_reply = False
 
-
         if not waiting_for_reply:
             self.send_to_colorbot(test_str)
             print("Sent from PC -- TEST STR -- " + test_str)
@@ -382,15 +383,9 @@ class PumpController:
 
             print("===========")
 
-
-
-    
-       
-    
-    ### CONTROLS ### 
+    ### CONTROLS ###
 
     def get_config(self):
-
         """
         Reads and loads the pump configuration from a JSON file named 'config.json'.
 
@@ -405,44 +400,40 @@ class PumpController:
         - The file is expected to contain a JSON-formatted configuration for pump settings.
         - The configuration data is returned as a dictionary.
         """
-        
-        
 
         try:
             with open(self.config_file, "r") as file:
                 pump_config = json.load(file)
         except FileNotFoundError:
-            raise FileNotFoundError(f"Error: {self.config_file} file not found. Please make sure the file exists in the current directory.")
-        
+            raise FileNotFoundError(
+                f"Error: {self.config_file} file not found. Please make sure the file exists in the current directory."
+            )
+
         return pump_config
-    
 
     def get_ph(self):
 
-            if (self.mode == "USB"):
-                self.run_test(f"<ph>")
-                msg = ""
-                while msg.find("ph") == -1:
-                    while self.ser.in_waiting == 0:
-                        pass
+        if self.mode == "USB":
+            self.run_test(f"<ph>")
+            msg = ""
+            while msg.find("ph") == -1:
+                while self.ser.in_waiting == 0:
+                    pass
 
-                    msg = self.recv_from_colorbot()
-                    ph = msg.split(':')[1]
-              
+                msg = self.recv_from_colorbot()
+                ph = msg.split(":")[1]
 
-
-                return ph
-
-            else: 
-                task = "ph"
-                msg = self.mqtt_task_manager(task)
-                ph = msg.get('pH_value')
-                print(msg.get("status"))
-            
             return ph
 
-    def measure(self):
+        else:
+            task = "ph"
+            msg = self.mqtt_task_manager(task)
+            ph = msg.get("pH_value")
+            print(msg.get("status"))
 
+        return ph
+
+    def measure(self):
         """
         Initiates a measurement and retrieves RGB values from the Arduino.
 
@@ -461,58 +452,58 @@ class PumpController:
             self.run_test("<Meas>")
             rgb_vals = self.get_rgb()
 
-        else: 
-   
+        else:
+
             # You may need to use a dict for task, not set
-              task = "Meas"  # Or whatever your MQTT expects
-              msg = self.mqtt_task_manager(task)
-              print(msg.get("status"))
+            task = "Meas"  # Or whatever your MQTT expects
+            msg = self.mqtt_task_manager(task)
+            print(msg.get("status"))
 
-              # Extract r, g, b from nested dict (if present)
-              color_sense = msg.get("color_sense", {})
-              rgb_vals = [color_sense.get("r", 0), color_sense.get("g", 0), color_sense.get("b", 0)]
+            # Extract r, g, b from nested dict (if present)
+            color_sense = msg.get("color_sense", {})
+            rgb_vals = [
+                color_sense.get("r", 0),
+                color_sense.get("g", 0),
+                color_sense.get("b", 0),
+            ]
 
-    
         self.show_rgb_color(rgb_vals)
-            
+
         return rgb_vals
-    
+
     def get_rgb(self):
+        """
+        Retrieves RGB values from the colorbot by waiting for a message containing 'RGB'.
 
-            """
-            Retrieves RGB values from the colorbot by waiting for a message containing 'RGB'.
+        Parameters:
+        - None
 
-            Parameters:
-            - None
+        Returns:
+        - list: A list of RGB values [R, G, B] received from the colorbot.
 
-            Returns:
-            - list: A list of RGB values [R, G, B] received from the colorbot.
+        Notes:
+        - This method continuously checks for a message containing 'RGB' from the colorbot.
+        - It uses the `recv_from_colorbot` method to receive data and extracts RGB values from the message.
+        - The RGB values are expected to be in the format 'RGB:XX,YY,ZZ'.
+        """
 
-            Notes:
-            - This method continuously checks for a message containing 'RGB' from the colorbot.
-            - It uses the `recv_from_colorbot` method to receive data and extracts RGB values from the message.
-            - The RGB values are expected to be in the format 'RGB:XX,YY,ZZ'.
-            """
+        if self.mode == "USB":
 
-            if (self.mode == "USB"): 
+            msg = ""
+            while msg.find("RGB") == -1:
+                while self.ser.in_waiting == 0:
+                    pass
 
-                msg = ""
-                while msg.find("RGB") == -1:
-                    while self.ser.in_waiting == 0:
-                        pass
+                msg = self.recv_from_colorbot()
+                rgb_vals = list(map(int, msg.split(":")[1].split(",")))
+        else:
+            print("This function is only for USB mode")
+            return
 
-                    msg = self.recv_from_colorbot()
-                    rgb_vals = list(map(int, msg.split(':')[1].split(',')))
-            else:
-                print("This function is only for USB mode")
-                return
-        
-
-            return rgb_vals
-
+        return rgb_vals
 
     def show_rgb_color(self, rgb):
-        r,g,b = rgb
+        r, g, b = rgb
         html = f"""
         <div style="
             width: 100px;
@@ -525,14 +516,9 @@ class PumpController:
         """
         display(HTML(html))
 
-   
-
- 
-    
     # Single Control Functions
 
-    def purge_pump(self, pump, purge_time = 10.0):
-
+    def purge_pump(self, pump, purge_time=10.0):
         """
         Initiates a pump purging (priming) process to fill the hose with liquid.
 
@@ -549,20 +535,18 @@ class PumpController:
         - The purging process is used to ensure accurate liquid pumping during subsequent operations.
         """
 
-        pump_pin = self.pump_config['pumps'][pump]['pin']
+        pump_pin = self.pump_config["pumps"][pump]["pin"]
 
-        if (self.mode == "USB"):
+        if self.mode == "USB":
             self.run_test(f"<Mix,{pump_pin},{purge_time}>")
 
-        else: 
+        else:
             print(f"Purging pump {pump} for {purge_time} seconds...")
             task = {"Mix": pump_pin, "duration": purge_time}
             msg = self.mqtt_task_manager(task, purge_time)
             print(msg.get("status"))
-            
 
     def run_pump(self, pump, volume):
-
         """
         Initiates a pump operation to dispense a specified volume of liquid.
 
@@ -580,24 +564,22 @@ class PumpController:
         - If the specified volume or the calculated run time is 0 or less, the pump is not activated.
         """
 
-        pump_pin = self.pump_config['pumps'][pump]['pin']
+        pump_pin = self.pump_config["pumps"][pump]["pin"]
         if volume > 0:
-            a = self.pump_config['pumps'][pump]['a']
-            b = self.pump_config['pumps'][pump]['b']
+            a = self.pump_config["pumps"][pump]["a"]
+            b = self.pump_config["pumps"][pump]["b"]
             pump_time = a * volume + b
 
             if pump_time > 0:
-                if (self.mode == "USB"):
+                if self.mode == "USB":
                     self.run_test(f"<Mix,{pump_pin},{pump_time}>")
-            
-                else: 
-                    task = {"Mix":pump_pin, "duration": pump_time}
+
+                else:
+                    task = {"Mix": pump_pin, "duration": pump_time}
                     msg = self.mqtt_task_manager(task, pump_time)
                     print(msg.get("status"))
 
-                
     def flush(self):
-
         """
         Initiates a flush operation using the water pump to fill the test cell.
 
@@ -611,11 +593,10 @@ class PumpController:
         - This method uses the `run_pump` method to initiate a flush operation using the water pump ('W').
         - The specified cell volume determines the amount of water to be dispensed during the flush.
         """
-        
-        self.run_pump('W', self.cell_volume)
 
-    def drain(self, drain_time = None):
+        self.run_pump("W", self.cell_volume)
 
+    def drain(self, drain_time=None):
         """
         Initiates a drain operation using the drain pump to drain liquid for a specified duration.
 
@@ -632,14 +613,13 @@ class PumpController:
         - The specified drain time determines how long the drain pump will be activated for liquid purging.
         """
         if drain_time == None:
-            self.purge_pump('D', self.drain_time)
+            self.purge_pump("D", self.drain_time)
         else:
-            self.purge_pump('D', drain_time)
+            self.purge_pump("D", drain_time)
 
     # Sequence Control Functions
-        
-    def reset(self):
 
+    def reset(self):
         """
         Performs a system reset by draining, flushing, and draining again for new measurements.
 
@@ -656,15 +636,14 @@ class PumpController:
 
         self.drain()
         time.sleep(1)
-        
+
         self.flush()
         time.sleep(1)
-        
+
         self.drain()
         time.sleep(1)
 
-    def mix_color(self, col_list, changing_target = False):
-
+    def mix_color(self, col_list, changing_target=False):
         """
         Initiates a color mixing process by running pumps based on a specified color composition.
 
@@ -685,23 +664,25 @@ class PumpController:
         """
 
         # Normalization
-        col_list = np.array(col_list).reshape(4,) # Make sure that input list has np shape (4,)
+        col_list = np.array(col_list).reshape(
+            4,
+        )  # Make sure that input list has np shape (4,)
         col_list[col_list < 0] = 0
         if col_list.sum() == 0:
             col_list = [0.25, 0.25, 0.25, 0.25]
         else:
             col_list = np.divide(col_list, col_list.sum())
-        
+
         log_col_list = col_list
-        
+
         col_list = [i * self.cell_volume for i in col_list]
-        self.run_pump('R', col_list[0])
+        self.run_pump("R", col_list[0])
         time.sleep(1)
-        self.run_pump('G', col_list[1])
+        self.run_pump("G", col_list[1])
         time.sleep(1)
-        self.run_pump('B', col_list[2])
+        self.run_pump("B", col_list[2])
         time.sleep(1)
-        self.run_pump('Y', col_list[3])
+        self.run_pump("Y", col_list[3])
 
         time.sleep(1)
 
@@ -713,12 +694,15 @@ class PumpController:
 
         if not changing_target:
             # Append color mixture and measurement data to the log file
-            write_to_logfile(log_col_list, rgb_measurement, self.target_mixture, self.target_color, self.log_file)
+            write_to_logfile(
+                log_col_list,
+                rgb_measurement,
+                self.target_mixture,
+                self.target_color,
+                self.log_file,
+            )
 
         return rgb_measurement
-    
-    
-    
 
     def change_target(self, target_mixture):
         """
@@ -734,19 +718,11 @@ class PumpController:
         - This method sets the target color mixture and measures it using the `mix_color` method.
         """
         self.target_mixture = target_mixture
-        self.target_color = self.mix_color(target_mixture, changing_target = True)
-        #self.target_color = self.mix_color(target_mixture)
+        self.target_color = self.mix_color(target_mixture, changing_target=True)
+        # self.target_color = self.mix_color(target_mixture)
 
-        print(f"Target changed to {self.target_color}. Created by {self.target_mixture}.")
+        print(
+            f"Target changed to {self.target_color}. Created by {self.target_mixture}."
+        )
 
         return self.target_color
-
-    
-
-
-
-    
-    
-
-
-       

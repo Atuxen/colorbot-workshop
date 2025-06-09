@@ -4,15 +4,18 @@ import secrets_mqtt as mqtt_conf
 import uuid
 import queue
 
+
 class OfflineException(Exception):
     """Custom exception for offline status."""
+
     pass
+
 
 class HiveMQ:
     def __init__(self, host, port, user, pwd):
         self.client = mqtt.Client(client_id="colab-tool")
         self.client.username_pw_set(user, pwd)
-        self.client.tls_set(cert_reqs=ssl.CERT_NONE)   # skip-verify, matches ESP32
+        self.client.tls_set(cert_reqs=ssl.CERT_NONE)  # skip-verify, matches ESP32
         self.client.tls_insecure_set(True)
         self.status_message = None
 
@@ -23,14 +26,14 @@ class HiveMQ:
         # Define callback to handle incoming messages
         def on_message(client, userdata, msg):
             self.status_message = msg
-            print(f"Last retained message on topic'{msg.topic}':") 
+            print(f"Last retained message on topic'{msg.topic}':")
             print(msg.payload.decode())
             if msg.payload.decode() == "offline":
                 raise OfflineException("Colorbot is offline!")
             else:
                 print("Computer and colorbot online and ready!")
 
-        try: 
+        try:
             self.client.on_message = on_message
             self.client.connect(mqtt_conf.BROKER_HOST, mqtt_conf.PORT)
             self.client.loop_start()
@@ -56,7 +59,6 @@ class HiveMQ:
         except Exception as e:
             print(f"Error connecting to MQTT broker: {e}")
             raise e
-
 
 
 # We only use this funciton for jupyter notebooks (and not the class above), as the notebook cells start blocking background threads
@@ -104,10 +106,9 @@ def request_task(task, timeout=8):
         task_payload = task  # e.g. "Meas"
 
     print(f"Sending request with request id: {req_id}")
-    client.publish(mqtt_conf.TOPIC_CMD, json.dumps({
-        "task": task_payload,
-        "req_id": req_id
-    }))
+    client.publish(
+        mqtt_conf.TOPIC_CMD, json.dumps({"task": task_payload, "req_id": req_id})
+    )
 
     try:
         response = result_q.get(timeout=timeout)
