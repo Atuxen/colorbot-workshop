@@ -26,6 +26,9 @@ class SilicoPumpController:
 
         self.target_mixture = [0.25, 0.25, 0.25, 0.25]
         self.target_color = [255, 255, 255]
+        self.true_coefficients = np.array(
+            [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]]
+        )
 
         # Create "logs" folder if it doesn't exist
         if not os.path.exists("silicologs"):
@@ -38,6 +41,30 @@ class SilicoPumpController:
             columns=["mixture", "measurement", "target_mixture", "target_measurement"]
         )
         log_df.to_csv(self.log_file, index=False)
+
+    def set_color_coefficient(
+        self, r=[255, 0, 0], g=[0, 255, 0], b=[0, 0, 255], y=[255, 255, 0]
+    ) -> None:
+        """
+        Sets the color coefficients for the pump controller.
+
+        Parameters:
+        - r, g, b, y (list): Lists of length 3 representing RGB values for red, green, blue, and yellow.
+
+        Returns:
+        - None
+
+        Notes:
+        - Validates that each list is of length 3, contains positive numbers that do not exceed 255.
+        - Updates the true_coefficients attribute.
+        """
+        for color in [r, g, b, y]:
+            if len(color) != 3 or any(c < 0 or c > 255 for c in color):
+                raise ValueError(
+                    "Each color coefficient must be a list of 3 numbers between 0 and 255."
+                )
+
+        self.true_coefficients = np.array([r, g, b, y])
 
     def mix_color(self, col_list, changing_target=False, ph=False):
         """
@@ -55,10 +82,6 @@ class SilicoPumpController:
         - Appends color mixture and measurement data to the log file unless changing_target is True.
         """
 
-        true_coefficients = np.array(
-            [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]]
-        )
-
         # Normalization
         col_list = np.array(col_list).reshape(
             4,
@@ -69,7 +92,7 @@ class SilicoPumpController:
         else:
             col_list = np.divide(col_list, col_list.sum())
 
-        mixed_color = np.dot(col_list, true_coefficients)
+        mixed_color = np.dot(col_list, self.true_coefficients)
         noise = np.random.normal(0, self.noise_std, mixed_color.shape)
         mixed_color_with_noise = np.clip(mixed_color + noise, 0, 255)
 
