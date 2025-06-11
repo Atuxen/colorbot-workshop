@@ -1,12 +1,11 @@
-# Use official Python 3.12 image
 FROM python:3.12.3-slim
 
-# Set environment variables
+# Environment setup
 ENV POETRY_VERSION=1.8.2 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -16,25 +15,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
-
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Add Poetry to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
-# Set work directory
+# Work dir
 WORKDIR /app
 
-# Copy project files
-COPY . /app
-
 # Install dependencies
+COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-root
 
-# Expose port for Jupyter Lab
+# Copy app files
+COPY . /app
+
+# Expose JupyterLab port
 EXPOSE 8888
 
-# Default command
-CMD ["poetry", "run", "env", "PYTHONPATH=/app", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
-
+# Run JupyterLab without token or password
+CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--ServerApp.token=", "--ServerApp.password="]

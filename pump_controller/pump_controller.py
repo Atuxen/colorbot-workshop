@@ -33,7 +33,7 @@ class PumpController:
         ser_port,
         baud_rate=115200,
         cell_volume=5.0,
-        drain_time=10.0,
+        drain_time=8.0,
         config_file="config.json",
     ):
         """
@@ -226,7 +226,7 @@ class PumpController:
         else:
             task_payload = task
 
-        print(f"Sending request with request id: {req_id}")
+        #print(f"Sending request with request id: {req_id}")
         client.publish(
             mqtt_conf.TOPIC_CMD, json.dumps({"task": task_payload, "req_id": req_id})
         )
@@ -467,6 +467,7 @@ class PumpController:
                 color_sense.get("b", 0),
             ]
 
+        
         self.show_rgb_color(rgb_vals)
 
         return rgb_vals
@@ -577,7 +578,7 @@ class PumpController:
                 else:
                     task = {"Mix": pump_pin, "duration": pump_time}
                     msg = self.mqtt_task_manager(task, pump_time)
-                    print(msg.get("status"))
+                    #print(msg.get("status"))
 
     def flush(self):
         """
