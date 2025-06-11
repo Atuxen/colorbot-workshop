@@ -23,7 +23,7 @@ Then in a terminal:
 ```bash
 docker run --rm -it -p 8888:8888 \
   -v "$PWD/secrets_mqtt.py:/app/secrets_mqtt.py" \
-  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:1.1
+  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:amd64-1.3
 
 ```
 
@@ -41,7 +41,7 @@ docker build -t sdl-lab .
 docker run -p 8888:8888 sdl-lab
  ```
 
- 
+
 Now your Docker image is running, and you can see it in your browser by entering:
 ```bash
  http://127.0.0.1:8888/lab
