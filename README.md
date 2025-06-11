@@ -27,10 +27,28 @@ docker run --rm -it -p 8888:8888 \
 
 ```
 
+
+Building the docker image yourself: 
+
+```bash
+git clone https://gitlab.com/auto_lab/ai-orchestrated-sdl.git
+cd ai-orchestrated-sdl
+ ```
+
+Now put your secrets_mqtt.py file in the same ai-orchestrated-sdl folder and build the image. This should have docker build to whatever chip running on your machine:
+ ```bash
+docker build -t sdl-lab .
+docker run -p 8888:8888 sdl-lab
+ ```
+
+ 
 Now your Docker image is running, and you can see it in your browser by entering:
 ```bash
  http://127.0.0.1:8888/lab
  ```
+
+
+
 
 ### Option 2: Local Setup (Required for USB Serial)
 

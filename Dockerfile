@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     libssl-dev \
     openssh-client \
-    && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
@@ -24,7 +25,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY pyproject.toml poetry.lock* /app/
-RUN poetry install --no-root
+RUN poetry install --no-root --no-interaction --no-ansi \
+ && rm -rf ~/.cache/pypoetry/* ~/.cache/pip/*
 
 # Copy app files
 COPY . /app
