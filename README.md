@@ -17,37 +17,49 @@ If you are using this for DTU course 47332 or 47216, this is the mode you should
 Download and install Docker Desktop from:  
 https://www.docker.com/products/docker-desktop/
 
-From your instructor, you will be given a secrets_mqtt.py file, which you should put in your working directory, from which you run this command:
+From your instructor, you will be given a ´secrets_mqtt.py´ file, which you should put in your working directory, from which you run this command:
 
-Then in a terminal:
+
+
+**Mac user (ARM) in terminal**:
 ```bash
 docker run --rm -it -p 8888:8888 \
   -v "$PWD/secrets_mqtt.py:/app/secrets_mqtt.py" \
-  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:amd64-1.3
+  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:arm-1.4
 
 ```
+**Windows user (AMD64) in power shell:**
+```bash
+docker run --rm -it -p 8888:8888  -v "${PWD}\secrets_mqtt.py:/app/secrets_mqtt.py"  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:amd64-1.4
+```
 
+Now your Docker image is running, and you can see it in your browser by entering. **Beware to download any data you create, as you may loose it when restarting the image!**:
+```bash
+ http://127.0.0.1:8888/lab
+ ```
 
+#### Option 1.1: Build the Docker image yourself:
+The above Docker images are prebuil for ARM and AMD, but if you want you can also build yourself, in which Docker will build your system.
 Building the docker image yourself: 
+
+If you don't have git already, download it here: https://git-scm.com/downloads. Now clone the repo:
 
 ```bash
 git clone https://gitlab.com/auto_lab/ai-orchestrated-sdl.git
 cd ai-orchestrated-sdl
  ```
 
-Now put your secrets_mqtt.py file in the same ai-orchestrated-sdl folder and build the image. This should have docker build to whatever chip running on your machine:
+Now put your ´secrets_mqtt.py´ file in the same ai-orchestrated-sdl folder and build the image. This should have docker build to whatever chip running on your machine:
+
  ```bash
 docker build -t sdl-lab .
 docker run -p 8888:8888 sdl-lab
  ```
 
-
 Now your Docker image is running, and you can see it in your browser by entering:
 ```bash
  http://127.0.0.1:8888/lab
  ```
-
-
 
 
 ### Option 2: Local Setup (Required for USB Serial)

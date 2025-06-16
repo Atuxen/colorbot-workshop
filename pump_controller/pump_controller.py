@@ -32,8 +32,8 @@ class PumpController:
         self,
         ser_port,
         baud_rate=115200,
-        cell_volume=5.0,
-        drain_time=8.0,
+        cell_volume=1.8,
+        drain_time=4.0,
         config_file="config.json",
     ):
         """
@@ -187,7 +187,7 @@ class PumpController:
             self.running_task = False
 
     def request_task(self, task, req_id, result_q, timeout_extra=0):
-        timeout = 10 + timeout_extra
+        timeout = 30 + timeout_extra
 
         def on_connect(client, userdata, flags, rc):
             client.subscribe(mqtt_conf.TOPIC_DATA)
