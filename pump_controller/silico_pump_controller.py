@@ -29,6 +29,7 @@ class SilicoPumpController:
         self.true_coefficients = np.array(
             [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]]
         )
+        self.ph_coefficient = np.array([[7.0], [7.0], [7.0], [7.0]])
 
         # Create "logs" folder if it doesn't exist
         if not os.path.exists("silicologs"):
@@ -66,6 +67,29 @@ class SilicoPumpController:
 
         self.true_coefficients = np.array([r, g, b, y])
 
+    def set_ph_coefficient(self, r=7.0, g=10.0, b=4.0, y=3.0) -> None:
+        """
+        Sets the pH coefficients for the pump controller.
+
+        Parameters:
+        - r, g, b, y (float or int): pH values for red, green, blue, and yellow.
+
+        Returns:
+        - None
+
+        Notes:
+        - Validates that each value is between 0 and 14.
+        - Converts integer values to float.
+        """
+        for value in [r, g, b, y]:
+            if not (0 <= value <= 14):
+                raise ValueError("Each pH coefficient must be between 0 and 14.")
+
+        # Convert integers to floats
+        r, g, b, y = map(float, [r, g, b, y])
+
+        self.ph_coefficient = np.array([[r], [g], [b], [y]])
+
     def mix_color(self, col_list, changing_target=False, ph=False):
         """
         Mixes colors based on the provided color coefficients and adds noise.
@@ -73,6 +97,7 @@ class SilicoPumpController:
         Parameters:
         - col_list (list or numpy.ndarray): List of color coefficients for mixing.
         - changing_target (bool, optional): If True, the mixing is considered as changing the target.
+        - ph (bool, optional): If True, pH value of the solution will also be returned.
 
         Returns:
         - numpy.ndarray: The mixed color with added noise.
@@ -107,9 +132,8 @@ class SilicoPumpController:
             )
 
         if ph:
-            ph_coefficients = np.array([[7], [12], [4], [3]])
-
-            ph_with_noise = np.dot(col_list, ph_coefficients) + noise
+            # Noise must be scalar and have much lower magnitude.
+            ph_with_noise = np.dot(col_list, self.ph_coefficient)[0] + (noise[0] / 20.0)
             return mixed_color_with_noise, ph_with_noise
 
         return mixed_color_with_noise
