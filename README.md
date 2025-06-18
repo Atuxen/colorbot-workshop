@@ -23,7 +23,7 @@ From your instructor, you will be given a ´secrets_mqtt.py´ file, which you sh
 
 **Mac user (ARM) in terminal**:
 ```bash
-docker run --rm -it -p 8888 \
+docker run --rm -it -p 8888:8888 \
   -v "$PWD/secrets_mqtt.py:/app/secrets_mqtt.py" \
   registry.gitlab.com/auto_lab/ai-orchestrated-sdl:arm-1.7
 
