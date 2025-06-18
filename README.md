@@ -25,12 +25,12 @@ From your instructor, you will be given a ´secrets_mqtt.py´ file, which you sh
 ```bash
 docker run --rm -it -p 8888 \
   -v "$PWD/secrets_mqtt.py:/app/secrets_mqtt.py" \
-  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:arm-1.5
+  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:arm-1.7
 
 ```
 **Windows user (AMD64) in power shell:**
 ```bash
-docker run --rm -it -p 8888:8888  -v "${PWD}\secrets_mqtt.py:/app/secrets_mqtt.py"  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:amd64-1.5
+docker run --rm -it -p 8888:8888  -v "${PWD}\secrets_mqtt.py:/app/secrets_mqtt.py"  registry.gitlab.com/auto_lab/ai-orchestrated-sdl:amd64-1.7
 ```
 
 Now your Docker image is running, and you can see it in your browser by entering. **Beware to download any data you create, as you may loose it when restarting the image!**:
