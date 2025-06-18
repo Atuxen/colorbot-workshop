@@ -433,7 +433,7 @@ class PumpController:
 
         return ph
 
-    def measure(self):
+    def measure(self, pH=False):
         """
         Initiates a measurement and retrieves RGB values from the Arduino.
 
@@ -469,6 +469,10 @@ class PumpController:
 
         
         self.show_rgb_color(rgb_vals)
+        if pH:
+            ph = self.get_ph()
+            print(f"pH value: {ph}")
+            return rgb_vals, ph
 
         return rgb_vals
 
