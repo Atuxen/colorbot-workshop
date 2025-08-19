@@ -23,7 +23,7 @@ import uuid
 import json
 import ssl
 
-mqtt_conf = MQTT_CLASS(2)
+
 
 # from pump_controller.mqtt_utils import request_task
 from IPython.display import display, HTML
@@ -37,6 +37,7 @@ class PumpController:
         cell_volume=1.8,
         drain_time=4.0,
         config_file="config.json",
+        id = 2,
     ):
         """
         Initializes a PumpController instance with the specified serial port and baud rate.
@@ -58,6 +59,7 @@ class PumpController:
         - Retrieves the pump configuration from 'config.json' and stores it in the 'pump_config' attribute.
         """
         # Running from home with no USB serial access:
+        self.mqtt_conf = MQTT_CLASS(id)
         self.running_task = False
         self.mode = ""
         if ser_port == None:
@@ -105,7 +107,7 @@ class PumpController:
                 print("USB connection established, colorbot ready!")
 
             if self.mode == "WIFI":
-                wifi_creds = f"{{{mqtt_conf.wifi_name}, {mqtt_conf.wifi_pass}}}"
+                wifi_creds = f"{{{self.mqtt_conf.wifi_name}, {self.mqtt_conf.wifi_pass}}}"
                 self.ser.write((wifi_creds + "\n").encode())
 
                 n = 5
@@ -192,7 +194,7 @@ class PumpController:
         timeout = 30 + timeout_extra
 
         def on_connect(client, userdata, flags, rc):
-            client.subscribe(mqtt_conf.TOPIC_DATA)
+            client.subscribe(self.mqtt_conf.TOPIC_DATA)
 
         def on_message(client, userdata, msg):
             try:
@@ -203,13 +205,13 @@ class PumpController:
                 print("Parse error:", e)
 
         client = mqtt.Client()
-        client.username_pw_set(mqtt_conf.USERNAME, mqtt_conf.PASSWORD)
+        client.username_pw_set(self.mqtt_conf.USERNAME, self.mqtt_conf.PASSWORD)
         client.tls_set(cert_reqs=ssl.CERT_NONE)
         client.tls_insecure_set(True)
         client.on_connect = on_connect
         client.on_message = on_message
 
-        client.connect(mqtt_conf.BROKER_HOST, mqtt_conf.PORT)
+        client.connect(self.mqtt_conf.BROKER_HOST, self.mqtt_conf.PORT)
         client.loop_start()
 
         # Wait for connection
@@ -230,7 +232,7 @@ class PumpController:
 
         #print(f"Sending request with request id: {req_id}")
         client.publish(
-            mqtt_conf.TOPIC_CMD, json.dumps({"task": task_payload, "req_id": req_id})
+            self.mqtt_conf.TOPIC_CMD, json.dumps({"task": task_payload, "req_id": req_id})
         )
 
         try:
