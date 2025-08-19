@@ -13,7 +13,7 @@ from .mqtt_utils import HiveMQ
 import threading, json, time
 from queue import Queue, Empty
 from pathlib import Path
-import secrets_mqtt as mqtt_conf
+from secrets_mqtt import MQTT_CLASS
 import uuid
 import sys
 import paho.mqtt.client as mqtt
@@ -22,6 +22,8 @@ import time
 import uuid
 import json
 import ssl
+
+mqtt_conf = MQTT_CLASS(2)
 
 # from pump_controller.mqtt_utils import request_task
 from IPython.display import display, HTML
