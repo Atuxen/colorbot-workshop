@@ -6,6 +6,8 @@ from .utils import read_logfile, write_to_logfile
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd   
 
 
 __all__ = [
@@ -18,5 +20,6 @@ __all__ = [
     "read_logfile",
     "write_to_logfile",
     "np",
-    "plt"
+    "plt",
+    "pd"
 ]
