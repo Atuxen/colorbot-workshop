@@ -11,11 +11,11 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.11"
 pyserial = "*"
-numpy = >=2.0.0
-pandas = ">=2.2.0,<3.0.0"
-matplotlib =  ">=3.9.0,<4.0.0"
+numpy = ">=2.0.0"
+pandas = ">=2.2.0"
+matplotlib =  ">=3.9.0"
 botorch = "*"
-scipy = ">=1.13.0,<2.0.0"
+scipy = ">=1.13.0"
 ipython = "*"
 paho-mqtt = "^2.1.0"
 odyssey = { git = "https://gitlab.com/auto_lab/odyssey.git", rev = "a9aed88" }
