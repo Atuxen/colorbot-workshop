@@ -170,7 +170,7 @@ def visualize_candidates(data_df):
         return ax
 
     # Reformat the dataframe to make all lists numpy (hacky, but works)
-    data_df = data_df[["mixture", "measurement", "target_mixture","target_measurement", "score"]]
+    data_df = data_df[["mixture", "measurement","target_measurement", "score"]]
 
     data_list = data_df.T.values.tolist()
     data_list = [np.array(col) for col in data_list]
