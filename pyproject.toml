@@ -15,12 +15,11 @@ numpy = ">=1.26,<2.0.0"
 pandas = ">=2.2.0,<3.0.0"
 matplotlib = ">=3.9.0,<4.0.0"
 scipy = ">=1.13.0,<2.0.0"
-botorch = ">=0.15.0"
+botorch = "*"
 torch = ">=2.2.0"
 ipython = "*"
 paho-mqtt = "^2.1.0"
 odyssey = { git = "https://gitlab.com/auto_lab/odyssey.git", rev = "a9aed88" }
-typeguard = ">=4.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
